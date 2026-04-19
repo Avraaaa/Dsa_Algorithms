@@ -1,65 +1,44 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
-
+ 
 using namespace std;
-
-void traceback(const vector<int>& first, int target) {
-    if (target == 0) return;
-    
-    if (first[target] == -1) {
-        cout << "No solution possible." << endl;
-        return;
-    }
-
-    cout << "Coins used: ";
-    int curr = target;
-    while (curr > 0) {
-        cout << first[curr] << " ";
-        curr -= first[curr];
-    }
-    cout << endl;
-}
-
-void coinChange(const vector<int>& coins, int target) {
-    vector<int> dp(target + 1, target + 1);
-    vector<int> first(target + 1, -1);
-
-    dp[0] = 0;
-
-    for (int i = 1; i <= target; i++) {
-        for (int coin : coins) {
-            if (i >= coin) {
-                if (dp[i - coin] + 1 < dp[i]) {
-                    dp[i] = dp[i - coin] + 1;
-                    first[i] = coin;
-                }
-            }
+ 
+void coinChangeWays(const vector<int>& coins, int target) {
+    // dp[i] will store the total NUMBER OF WAYS to make the amount i.
+    // Initialize the array with 0s because we start with 0 known ways.
+    vector<long long> dp(target + 1, 0); 
+ 
+    // Base case: There is exactly 1 way to make a target of 0 (use no coins).
+    dp[0] = 1;
+ 
+    // Notice the loop order is flipped compared to the minimum coins problem!
+    // We loop over coins FIRST to ensure we only count combinations (e.g., 1+2), 
+    // and don't double-count permutations (e.g., counting 1+2 and 2+1 as two different ways).
+    for (int coin : coins) {
+        for (int i = coin; i <= target; i++) {
+            // The transition: The number of ways to make amount 'i' is its current ways 
+            // PLUS the number of ways to make the remainder (i - coin).
+            dp[i] += dp[i - coin];
         }
     }
-
-    if (dp[target] > target) {
-        cout << "Impossible to make sum." << endl;
-    } else {
-        cout << "Minimum coins: " << dp[target] << endl;
-        traceback(first, target);
-    }
+ 
+    cout << "Total possible ways: " << dp[target] << endl;
 }
-
+ 
 int main() {
     int n, target;
     cout << "Enter number of coin types: ";
     cin >> n;
-
+ 
     vector<int> coins(n);
     cout << "Enter coin values: ";
     for (int i = 0; i < n; i++) {
         cin >> coins[i];
     }
-
+ 
     cout << "Enter target amount: ";
     cin >> target;
-
-    coinChange(coins, target);
+ 
+    coinChangeWays(coins, target);
     return 0;
 }
