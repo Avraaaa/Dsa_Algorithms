@@ -1,29 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <algorithm> // Required for std::max
 
-int max(int a, int b) {
+using namespace std;
+
+// Using the built-in std::max or keeping your custom one
+int max_val(int a, int b) {
     return (a > b) ? a : b;
 }
 
-int solveChocolate(int m, int n, int **prices) {
-    int dp[m + 1][n + 1];
-
-    for (int i = 0; i <= m; i++) {
-        for (int j = 0; j <= n; j++) {
-            dp[i][j] = 0;
-        }
-    }
+// Function signature updated to use a reference to a 2D vector
+int solveChocolate(int m, int n, const vector<vector<int>>& prices) {
+    // Initializing a 2D vector of size (m+1) x (n+1) filled with 0s
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
 
     for (int i = 1; i <= m; i++) {
         for (int j = 1; j <= n; j++) {
+            // Base case: Price of the piece without any cuts
             dp[i][j] = prices[i][j]; 
 
+            // Horizontal Cuts: Split the height 'i' into 'k' and 'i-k'
             for (int k = 1; k <= i / 2; k++) {
-                dp[i][j] = max(dp[i][j], dp[k][j] + dp[i - k][j]);
+                dp[i][j] = max_val(dp[i][j], dp[k][j] + dp[i - k][j]);
             }
 
+            // Vertical Cuts: Split the width 'j' into 'k' and 'j-k'
             for (int k = 1; k <= j / 2; k++) {
-                dp[i][j] = max(dp[i][j], dp[i][k] + dp[i][j - k]);
+                dp[i][j] = max_val(dp[i][j], dp[i][k] + dp[i][j - k]);
             }
         }
     }
@@ -35,22 +38,22 @@ int main() {
     int m = 4;
     int n = 4;
     
-    int **prices = (int **)malloc((m + 1) * sizeof(int *));
-    for (int i = 0; i <= m; i++) {
-        prices[i] = (int *)malloc((n + 1) * sizeof(int));
-    }
+    // Create a 2D vector for prices: (m+1) rows, each containing (n+1) ints
+    vector<vector<int>> prices(m + 1, vector<int>(n + 1));
 
-    for(int i=1; i<=m; i++) {
-        for(int j=1; j<=n; j++) {
+    // Fill prices with the default i * j
+    for(int i = 1; i <= m; i++) {
+        for(int j = 1; j <= n; j++) {
             prices[i][j] = i * j; 
         }
     }
+
+    // Assign the "special" high-value piece
     prices[2][2] = 100;
 
-    printf("Max Revenue: %d\n", solveChocolate(m, n, prices));
+    // Standard C++ output
+    cout << "Max Revenue: " << solveChocolate(m, n, prices) << endl;
 
-    for (int i = 0; i <= m; i++) free(prices[i]);
-    free(prices);
-
+    // No free() needed! Vectors clean themselves up when they go out of scope.
     return 0;
 }

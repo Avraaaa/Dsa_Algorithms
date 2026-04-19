@@ -77,6 +77,84 @@ pair<ll, vector<string>> edit_distance(const string &source, const string &targe
     return {dp[len1][len2], operations};
 }
 
+/*
+// -------------------------------------------------------------------------
+// RECURSIVE HELPER FUNCTION (The "Top-Down" part)
+// -------------------------------------------------------------------------
+ll get_min_distance(ll i, ll j, const string &source, const string &target, vector<vector<ll>> &memo) {
+    // Base Case 1: Source is empty, must insert remaining target characters
+    if (i == 0) return j;
+    
+    // Base Case 2: Target is empty, must delete remaining source characters
+    if (j == 0) return i;
+
+    // Memoization Check: If we already computed this state, return it
+    if (memo[i][j] != -1) {
+        return memo[i][j];
+    }
+
+    // Recursive Step 1: Characters match (Cost 0)
+    if (source[i - 1] == target[j - 1]) {
+        return memo[i][j] = get_min_distance(i - 1, j - 1, source, target, memo);
+    } 
+    
+    // Recursive Step 2: Characters differ (Cost 1 + min of operations)
+    ll replace_cost = get_min_distance(i - 1, j - 1, source, target, memo);
+    ll delete_cost  = get_min_distance(i - 1, j, source, target, memo);
+    ll insert_cost  = get_min_distance(i, j - 1, source, target, memo);
+
+    return memo[i][j] = 1 + min({replace_cost, delete_cost, insert_cost});
+}
+
+// -------------------------------------------------------------------------
+// MAIN EDIT DISTANCE LOGIC
+// -------------------------------------------------------------------------
+pair<ll, vector<string>> edit_distance_topdown(const string &source, const string &target) {
+    ll len1 = source.length();
+    ll len2 = target.length();
+
+    // Initialize memoization table with -1 (meaning "uncalculated")
+    vector<vector<ll>> memo(len1 + 1, vector<ll>(len2 + 1, -1));
+
+    // Pre-fill the base cases in the memo table. 
+    // We do this so the path reconstruction loop below has the 0th row/col data it needs.
+    for (ll j = 0; j <= len2; j++) memo[0][j] = j;
+    for (ll i = 0; i <= len1; i++) memo[i][0] = i;
+
+    // Trigger the recursive function from the "Top" (the full lengths)
+    ll min_dist = get_min_distance(len1, len2, source, target, memo);
+
+    //------------------- Path Reconstruction -------------------------
+    // This part remains exactly identical to the bottom-up approach!
+    vector<string> operations;
+    ll i = len1;
+    ll j = len2;
+
+    while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && source[i - 1] == target[j - 1]) {
+            operations.push_back("Keep '" + string(1, source[i - 1]) + "'");
+            i--;
+            j--;
+        } 
+        else if (i > 0 && j > 0 && memo[i][j] == memo[i - 1][j - 1] + 1) {
+            operations.push_back("Replace '" + string(1, source[i - 1]) + "' with '" + string(1, target[j - 1]) + "'");
+            i--;
+            j--;
+        } 
+        else if (i > 0 && memo[i][j] == memo[i - 1][j] + 1) {
+            operations.push_back("Delete '" + string(1, source[i - 1]) + "'");
+            i--;
+        } 
+        else if (j > 0 && memo[i][j] == memo[i][j - 1] + 1) {
+            operations.push_back("Insert '" + string(1, target[j - 1]) + "'");
+            j--;
+        }
+    }
+
+    reverse(operations.begin(), operations.end());
+
+    return {min_dist, operations};
+}*/
 int main() {
     // Fast I/O
     ios_base::sync_with_stdio(false);
